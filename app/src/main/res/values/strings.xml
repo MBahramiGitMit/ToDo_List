@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">ToDo List</string>
+
+    <string name="add_button">Add Button</string>
+    <string name="search_action">Search Tasks</string>
+    <string name="sort_action">Sort Tasks</string>
+    <string name="delete_all_actions">Delete All</string>
+    <string name="list_screen_title">Tasks</string>
+    <string name="search_placeholder">Search</string>
+    <string name="search_icon">Search Icon</string>
+    <string name="close_icon">Close Icon</string>
+    <string name="update_icon">Update Icon</string>
+    <string name="delete_icon">Delete Icon</string>
+    <string name="sad_face_icon">Sad Face Icon</string>
+    <string name="empty_content">No Tasks Found</string>
+    <string name="back_arrow">Back Arrow</string>
+    <string name="add_task">Add Task</string>
+    <string name="drop_down_arrow">Drop_Down Arrow Icon</string>
+    <string name="drop_down_arrow_anim">Drop_Down Arrow Animation</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
 </resources>
