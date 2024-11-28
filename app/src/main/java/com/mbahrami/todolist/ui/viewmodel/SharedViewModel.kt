@@ -1,5 +1,8 @@
 package com.mbahrami.todolist.ui.viewmodel
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mbahrami.todolist.data.models.ToDoTask
@@ -14,6 +17,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SharedViewModel @Inject constructor(private val repository: ToDoRepository) : ViewModel() {
+
+    private val _searchQuery: MutableState<String> = mutableStateOf("")
+    val searchQuery: State<String> = _searchQuery
+
     private val _allTask: MutableStateFlow<List<ToDoTask>> = MutableStateFlow(emptyList())
     val allTask: StateFlow<List<ToDoTask>> = _allTask
 
@@ -24,4 +31,9 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
             }
         }
     }
+
+    fun onSearchFieldValueChanged(newValue: String) {
+        _searchQuery.value = newValue
+    }
+
 }

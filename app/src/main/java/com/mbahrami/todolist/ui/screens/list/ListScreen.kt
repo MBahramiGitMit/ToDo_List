@@ -8,6 +8,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.mbahrami.todolist.R
@@ -22,9 +23,16 @@ fun ListScreen(
     sharedViewModel: SharedViewModel,
     navigateToTaskScreen: (taskId: Int) -> Unit
 ) {
+    val searchFieldValue by sharedViewModel.searchQuery
     Scaffold(
         topBar = {
-            ListAppBar()
+            ListAppBar(
+                searchFieldValue = searchFieldValue,
+                onSearchFieldValueChanged = { sharedViewModel.onSearchFieldValueChanged(it) },
+                onSearchClicked ={},
+                onSortClicked ={},
+                onDeleteAllClicked ={}
+            )
         },
         floatingActionButton = {
             ListFab(onFabClicked = navigateToTaskScreen)
