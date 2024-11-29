@@ -9,9 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.mbahrami.todolist.data.models.Priority
 import com.mbahrami.todolist.data.models.ToDoTask
 import com.mbahrami.todolist.data.repository.ToDoRepository
+import com.mbahrami.todolist.util.Action
 import com.mbahrami.todolist.util.Constants
 import com.mbahrami.todolist.util.RequestState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -43,6 +45,18 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
         if (newValue.length <= Constants.MAX_TITLE_LENGTH) {
             title.value = newValue
         }
+    }
+
+    fun handleAction(action: Action) {
+        when (action) {
+            Action.ADD -> {addTask()}
+            Action.UPDATE -> {}
+            Action.DELETE -> {}
+            Action.DELETE_ALL -> {}
+            Action.UNDO -> {}
+            else -> {}
+        }
+
     }
 
     fun getAllTask() {
@@ -84,6 +98,19 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
             title.value = ""
             description.value = ""
             priority.value = Priority.LOW
+        }
+    }
+
+    private fun addTask() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addTask(
+                toDoTask = ToDoTask(
+                    id = id.value,
+                    title = title.value,
+                    description = description.value,
+                    priority = priority.value
+                )
+            )
         }
     }
 

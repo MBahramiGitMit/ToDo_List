@@ -3,6 +3,7 @@ package com.mbahrami.todolist.ui.screens.task
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +26,10 @@ fun TaskScreen(
 
     val context = LocalContext.current
 
+    BackHandler(enabled = true, onBack = {
+        navigateToListScreen(Action.NO_ACTION)
+    })
+
     Scaffold(
         topBar = {
             TaskAppBar(
@@ -33,7 +38,7 @@ fun TaskScreen(
                     if (action == Action.ADD || action == Action.UPDATE) {
                         if (!sharedViewModel.validateFields()) {
                             displayToast(context = context, message = "Fields Empty!")
-                        }else{
+                        } else {
                             navigateToListScreen(action)
                         }
                     } else {
