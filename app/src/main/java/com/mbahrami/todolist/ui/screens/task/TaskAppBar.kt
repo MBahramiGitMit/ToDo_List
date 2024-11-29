@@ -15,22 +15,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.mbahrami.todolist.R
-import com.mbahrami.todolist.data.models.Priority
-import com.mbahrami.todolist.data.models.ToDoTask
 import com.mbahrami.todolist.ui.theme.topAppBarBackgroundColor
 import com.mbahrami.todolist.ui.theme.topAppBarContentColor
 import com.mbahrami.todolist.util.Action
 
 @Composable
 fun TaskAppBar(
-    selectedTask: ToDoTask?,
+    title: String?,
     navigateToListScreen: (Action) -> Unit
 ) {
-    if (selectedTask == null) {
+    if (title == null) {
         NewTaskAppBar(navigateToListScreen = navigateToListScreen)
     } else {
         ExistingTaskAppBar(
-            selectedTask = selectedTask,
+            title = title,
             navigateToListScreen = navigateToListScreen
         )
     }
@@ -81,7 +79,7 @@ fun AddAction(onAddClicked: (Action) -> Unit) {
 
 @Composable
 fun ExistingTaskAppBar(
-    selectedTask: ToDoTask,
+    title: String,
     navigateToListScreen: (Action) -> Unit
 ) {
     TopAppBar(
@@ -90,7 +88,7 @@ fun ExistingTaskAppBar(
         },
         title = {
             Text(
-                text = selectedTask.title,
+                text = title,
                 color = MaterialTheme.colors.topAppBarContentColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -148,6 +146,6 @@ fun PreviewNewTaskAppBar() {
 @Preview
 fun PreviewExistingTaskAppBar() {
     ExistingTaskAppBar(
-        ToDoTask(0, "title", "fsfsafsaf fsfsfdsa dsfwew safsf", Priority.HIGH),
+        title = "Title",
         navigateToListScreen = {})
 }

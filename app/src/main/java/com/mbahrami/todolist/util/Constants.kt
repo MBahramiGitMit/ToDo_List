@@ -11,5 +11,4 @@ object Constants {
     const val TASK_SCREEN = "task_screen"
     const val LIST_SCREEN_ROUTE = "$LIST_SCREEN/{$LIST_SCREEN_ARG_KEY}"
     const val TASK_SCREEN_ROUTE = "$TASK_SCREEN/{$TASK_SCREEN_ARG_KEY}"
-
 }

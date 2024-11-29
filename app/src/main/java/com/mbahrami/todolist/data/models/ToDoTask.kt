@@ -8,7 +8,7 @@ import com.mbahrami.todolist.util.Constants
 data class ToDoTask(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val title: String,
-    val description: String,
-    val priority: Priority
+    var title: String,
+    var description: String,
+    var priority: Priority
 )

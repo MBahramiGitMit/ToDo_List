@@ -1,5 +1,6 @@
 package com.mbahrami.todolist.navigation.destinations
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,8 +25,10 @@ fun NavGraphBuilder.taskComposable(
         })
     ) { navBackStackEntry ->
         val taskId = navBackStackEntry.arguments!!.getInt(TASK_SCREEN_ARG_KEY)
+        LaunchedEffect(key1 = taskId) {
+            sharedViewModel.getSelectedTask(taskId = taskId)
+        }
         TaskScreen(
-            taskId = taskId,
             sharedViewModel = sharedViewModel,
             navigateToListScreen = { action: Action ->
                 navController.navigate(route = "${LIST_SCREEN}/${action.name}") {
