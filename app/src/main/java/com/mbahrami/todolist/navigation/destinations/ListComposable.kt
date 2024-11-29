@@ -8,8 +8,8 @@ import androidx.navigation.navArgument
 import com.mbahrami.todolist.ui.screens.list.ListScreen
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
-import com.mbahrami.todolist.util.Constants.LIST_SCREEN
 import com.mbahrami.todolist.util.Constants.LIST_SCREEN_ARG_KEY
+import com.mbahrami.todolist.util.Constants.LIST_SCREEN_ROUTE
 import com.mbahrami.todolist.util.Constants.TASK_SCREEN
 import com.mbahrami.todolist.util.toAction
 
@@ -18,7 +18,7 @@ fun NavGraphBuilder.listComposable(
     sharedViewModel: SharedViewModel
 ) {
     composable(
-        route = "${LIST_SCREEN}/{${LIST_SCREEN_ARG_KEY}}",
+        route = LIST_SCREEN_ROUTE,
         arguments = listOf(navArgument(name = LIST_SCREEN_ARG_KEY) {
             type = NavType.StringType
         })
