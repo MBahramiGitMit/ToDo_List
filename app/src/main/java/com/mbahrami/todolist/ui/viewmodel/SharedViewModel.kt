@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.mbahrami.todolist.data.models.Priority
 import com.mbahrami.todolist.data.models.ToDoTask
 import com.mbahrami.todolist.data.repository.ToDoRepository
+import com.mbahrami.todolist.util.Constants
 import com.mbahrami.todolist.util.RequestState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,12 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
 
     fun onSearchFieldValueChanged(newValue: String) {
         _searchQuery.value = newValue
+    }
+
+    fun onTitleChanged(newValue: String) {
+        if (newValue.length <= Constants.MAX_TITLE_LENGTH) {
+            title.value = newValue
+        }
     }
 
     fun getAllTask() {
