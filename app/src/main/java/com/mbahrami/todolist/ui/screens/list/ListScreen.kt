@@ -8,6 +8,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -23,23 +25,30 @@ fun ListScreen(
     sharedViewModel: SharedViewModel,
     navigateToTaskScreen: (taskId: Int) -> Unit
 ) {
+    LaunchedEffect(true) {
+        sharedViewModel.getAllTask()
+    }
+
+    val allTasks by sharedViewModel.allTasks.collectAsState()
     val searchFieldValue by sharedViewModel.searchQuery
+
     Scaffold(
         topBar = {
             ListAppBar(
                 searchFieldValue = searchFieldValue,
                 onSearchFieldValueChanged = { sharedViewModel.onSearchFieldValueChanged(it) },
-                onSearchClicked ={},
-                onSortClicked ={},
-                onDeleteAllClicked ={}
+                onSearchClicked = {},
+                onSortClicked = {},
+                onDeleteAllClicked = {}
             )
         },
         floatingActionButton = {
             ListFab(onFabClicked = navigateToTaskScreen)
+        },
+        content = {
+            ListContent(tasks = allTasks, navigateToTaskScreen = navigateToTaskScreen)
         }
-    ) {
-
-    }
+    )
 }
 
 @Composable
