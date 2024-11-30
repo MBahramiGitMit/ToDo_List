@@ -6,6 +6,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberScaffoldState
@@ -20,6 +21,7 @@ import com.mbahrami.todolist.R
 import com.mbahrami.todolist.ui.theme.fabBackgroundColor
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -40,7 +42,7 @@ fun ListScreen(
 
     DisplaySnackBar(
         scaffoldState = scaffoldState,
-        actionHandler = { sharedViewModel.handleAction(action) },
+        actionHandler = { sharedViewModel.handleAction(it) },
         taskTitle = sharedViewModel.title.value,
         action = action
     )
@@ -89,11 +91,35 @@ fun DisplaySnackBar(
 ) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = action) {
-        if (action != Action.NO_ACTION) {
-            val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
-                message = "${action.name}: $taskTitle",
-                actionLabel = "OK"
-            )
+        scope.launch {
+            if (action != Action.NO_ACTION) {
+                val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
+                    message = "${action.name}: $taskTitle",
+                    actionLabel = setActionLabel(action = action)
+                )
+                undoDeletedTask(
+                    action = action,
+                    snackBarResult = snackBarResult,
+                    actionHandler = actionHandler
+                )
+            }
         }
+    }
+}
+
+private fun setActionLabel(action: Action): String {
+    return if (action == Action.DELETE)
+        "Undo"
+    else
+        "OK"
+}
+
+private fun undoDeletedTask(
+    action: Action,
+    snackBarResult: SnackbarResult,
+    actionHandler: (Action) -> Unit
+) {
+    if (snackBarResult == SnackbarResult.ActionPerformed && action == Action.DELETE) {
+        actionHandler(Action.UNDO)
     }
 }
