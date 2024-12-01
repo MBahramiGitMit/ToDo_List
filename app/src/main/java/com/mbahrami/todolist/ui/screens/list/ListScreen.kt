@@ -21,6 +21,7 @@ import com.mbahrami.todolist.R
 import com.mbahrami.todolist.ui.theme.fabBackgroundColor
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
+import com.mbahrami.todolist.util.SearchAppBarState
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -34,6 +35,8 @@ fun ListScreen(
     val scaffoldState = rememberScaffoldState()
 
     val allTasks by sharedViewModel.allTasks.collectAsState()
+    val searchedTasks by sharedViewModel.searchedTasks.collectAsState()
+    val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
     val searchFieldValue by sharedViewModel.searchQuery
 
     LaunchedEffect(true) {
@@ -53,7 +56,9 @@ fun ListScreen(
             ListAppBar(
                 searchFieldValue = searchFieldValue,
                 onSearchFieldValueChanged = { sharedViewModel.onSearchFieldValueChanged(it) },
-                onSearchClicked = {},
+                searchAppBarState = searchAppBarState,
+                onSearchAppBarStateChanged = { sharedViewModel.onSearchAppBarStateChange(newState = it) },
+                onSearchClicked = { sharedViewModel.getSearchedTask() },
                 onSortClicked = {},
                 onDeleteAllClicked = {}
             )
@@ -62,7 +67,11 @@ fun ListScreen(
             ListFab(onFabClicked = navigateToTaskScreen)
         },
         content = {
-            ListContent(tasks = allTasks, navigateToTaskScreen = navigateToTaskScreen)
+            if (searchAppBarState == SearchAppBarState.TRIGGERED) {
+                ListContent(tasks = searchedTasks, navigateToTaskScreen = navigateToTaskScreen)
+            } else {
+                ListContent(tasks = allTasks, navigateToTaskScreen = navigateToTaskScreen)
+            }
         }
     )
 }

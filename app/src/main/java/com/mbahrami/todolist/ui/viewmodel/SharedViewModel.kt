@@ -12,6 +12,7 @@ import com.mbahrami.todolist.data.repository.ToDoRepository
 import com.mbahrami.todolist.util.Action
 import com.mbahrami.todolist.util.Constants
 import com.mbahrami.todolist.util.RequestState
+import com.mbahrami.todolist.util.SearchAppBarState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,14 +32,24 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
     private val _allTasks = MutableStateFlow<RequestState<List<ToDoTask>>>(RequestState.Idle)
     val allTasks: StateFlow<RequestState<List<ToDoTask>>> = _allTasks
 
+    private val _searchedTasks = MutableStateFlow<RequestState<List<ToDoTask>>>(RequestState.Idle)
+    val searchedTasks: StateFlow<RequestState<List<ToDoTask>>> = _searchedTasks
+
     private val _searchQuery: MutableState<String> = mutableStateOf("")
     val searchQuery: State<String> = _searchQuery
+
+    val searchAppBarState: MutableState<SearchAppBarState> =
+        mutableStateOf(SearchAppBarState.CLOSED)
 
     private val _selectedTask: MutableStateFlow<ToDoTask?> = MutableStateFlow(null)
     val selectedTask: StateFlow<ToDoTask?> = _selectedTask
 
     fun onSearchFieldValueChanged(newValue: String) {
         _searchQuery.value = newValue
+    }
+
+    fun onSearchAppBarStateChange(newState: SearchAppBarState) {
+        searchAppBarState.value = newState
     }
 
     fun onTitleChanged(newValue: String) {
@@ -88,6 +99,20 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
 
     }
 
+    fun getSearchedTask() {
+        _searchedTasks.value = RequestState.Loading
+        try {
+            viewModelScope.launch {
+                repository.searchDatabase(searchQuery = searchQuery.value).collectLatest {
+                    _searchedTasks.value = RequestState.Success(data = it)
+                }
+            }
+        } catch (e: Exception) {
+            _searchedTasks.value = RequestState.Error(error = e)
+        }
+        onSearchAppBarStateChange(newState = SearchAppBarState.TRIGGERED)
+    }
+
     fun getSelectedTask(taskId: Int) {
         _selectedTask.value =
             if (allTasks.value is RequestState.Success) {
@@ -127,6 +152,7 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
                 )
             )
         }
+        onSearchAppBarStateChange(newState = SearchAppBarState.CLOSED)
     }
 
     private fun updateTask() {
@@ -153,6 +179,7 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
                 )
             )
         }
+        onSearchAppBarStateChange(newState = SearchAppBarState.CLOSED)
     }
 
     private fun undoTask() {
@@ -164,6 +191,7 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
             }
         }
     }
+
 
     fun validateFields(): Boolean {
         return title.value.isNotEmpty() && description.value.isNotEmpty()

@@ -26,17 +26,19 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import com.mbahrami.todolist.R
 import com.mbahrami.todolist.components.PriorityItem
 import com.mbahrami.todolist.data.models.Priority
@@ -51,23 +53,32 @@ import com.mbahrami.todolist.util.SearchAppBarState
 fun ListAppBar(
     searchFieldValue: String,
     onSearchFieldValueChanged: (String) -> Unit,
+    searchAppBarState: SearchAppBarState,
+    onSearchAppBarStateChanged: (SearchAppBarState) -> Unit,
     onSearchClicked: () -> Unit,
     onSortClicked: (Priority) -> Unit,
     onDeleteAllClicked: () -> Unit,
 ) {
-    var searchAppBarState by remember { mutableStateOf(SearchAppBarState.CLOSED) }
+    val focusRequester = remember { FocusRequester() }
     if (searchAppBarState == SearchAppBarState.CLOSED) {
         DefaultListAppBar(
-            onSearchClicked = { searchAppBarState = SearchAppBarState.OPENED },
+            onSearchClicked = { onSearchAppBarStateChanged(SearchAppBarState.OPENED) },
             onSortClicked = onSortClicked,
             onDeleteAllClicked = onDeleteAllClicked
         )
     } else {
+        LaunchedEffect(key1 = searchAppBarState) {
+            if (searchAppBarState == SearchAppBarState.OPENED) {
+                focusRequester.requestFocus()
+            }
+        }
         SearchAppBar(
             text = searchFieldValue,
             onTextChange = onSearchFieldValueChanged,
-            onCloseClicked = { searchAppBarState = SearchAppBarState.CLOSED },
-            onSearchClicked = onSearchClicked
+            onCloseClicked = { onSearchAppBarStateChanged(SearchAppBarState.CLOSED) },
+            onSearchClicked = onSearchClicked,
+            focusRequester = focusRequester
+
         )
     }
 
@@ -194,7 +205,8 @@ fun SearchAppBar(
     text: String,
     onTextChange: (String) -> Unit,
     onCloseClicked: () -> Unit,
-    onSearchClicked: () -> Unit
+    onSearchClicked: () -> Unit,
+    focusRequester: FocusRequester
 ) {
     Surface(
         modifier = Modifier
@@ -210,7 +222,9 @@ fun SearchAppBar(
 
         CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
             TextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 value = text,
                 onValueChange = onTextChange,
                 placeholder = {
@@ -269,18 +283,18 @@ fun SearchAppBar(
     }
 }
 
-@Composable
-@Preview
-fun DefaultListAppBarPreview() {
-    DefaultListAppBar(
-        onSearchClicked = {},
-        onSortClicked = {},
-        onDeleteAllClicked = {}
-    )
-}
-
-@Composable
-@Preview
-fun SearchAppBarPreview() {
-    SearchAppBar(text = "", onTextChange = {}, onCloseClicked = {}, onSearchClicked = {})
-}
+//@Composable
+//@Preview
+//fun DefaultListAppBarPreview() {
+//    DefaultListAppBar(
+//        onSearchClicked = {},
+//        onSortClicked = {},
+//        onDeleteAllClicked = {}
+//    )
+//}
+//
+//@Composable
+//@Preview
+//fun SearchAppBarPreview() {
+//    SearchAppBar(text = "", onTextChange = {}, onCloseClicked = {}, onSearchClicked = {})
+//}
