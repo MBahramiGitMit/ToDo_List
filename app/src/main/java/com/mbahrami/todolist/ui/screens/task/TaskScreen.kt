@@ -8,7 +8,13 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.mbahrami.todolist.R
+import com.mbahrami.todolist.components.DisplayAlertDialog
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
 
@@ -20,6 +26,8 @@ fun TaskScreen(
 ) {
     val selectedTask by sharedViewModel.selectedTask.collectAsState()
 
+    var isDeleteDialogOpen: Boolean by remember { mutableStateOf(false) }
+
     val title by sharedViewModel.title
     val description by sharedViewModel.description
     val priority by sharedViewModel.priority
@@ -29,6 +37,18 @@ fun TaskScreen(
     BackHandler(enabled = true, onBack = {
         navigateToListScreen(Action.NO_ACTION)
     })
+
+    selectedTask?.let {
+        DisplayAlertDialog(
+            isOpen = isDeleteDialogOpen,
+            title = stringResource(R.string.delete_task, selectedTask!!.title),
+            message = stringResource(R.string.delete_task_confirmation, selectedTask!!.title),
+            onConfirmClicked = {
+                navigateToListScreen(Action.DELETE)
+            },
+            onCloseClicked = { isDeleteDialogOpen = false }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -41,6 +61,8 @@ fun TaskScreen(
                         } else {
                             navigateToListScreen(action)
                         }
+                    } else if (action == Action.DELETE) {
+                        isDeleteDialogOpen = true
                     } else {
                         navigateToListScreen(action)
                     }

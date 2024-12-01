@@ -14,13 +14,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.mbahrami.todolist.R
+import com.mbahrami.todolist.components.DisplayAlertDialog
+import com.mbahrami.todolist.data.models.ToDoTask
+import com.mbahrami.todolist.ui.screens.task.displayToast
 import com.mbahrami.todolist.ui.theme.fabBackgroundColor
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
+import com.mbahrami.todolist.util.RequestState
 import com.mbahrami.todolist.util.SearchAppBarState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -35,6 +43,9 @@ fun ListScreen(
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    var isDeleteAllDialogOpen: Boolean by remember { mutableStateOf(false) }
 
     val allTasks by sharedViewModel.allTasks.collectAsState()
     val searchedTasks by sharedViewModel.searchedTasks.collectAsState()
@@ -54,7 +65,22 @@ fun ListScreen(
         )
     }
 
-
+    DisplayAlertDialog(
+        isOpen = isDeleteAllDialogOpen,
+        title = stringResource(R.string.delete_all_task),
+        message = stringResource(R.string.delete_all_task_confirmation),
+        onConfirmClicked = {
+            sharedViewModel.deleteAllTask()
+            displaySnackBar(
+                scaffoldState = scaffoldState,
+                scope = scope,
+                actionHandler = { sharedViewModel.handleAction(it) },
+                taskTitle = "",
+                action = Action.DELETE_ALL
+            )
+        },
+        onCloseClicked = { isDeleteAllDialogOpen = false }
+    )
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -67,15 +93,15 @@ fun ListScreen(
                 onSearchClicked = { sharedViewModel.getSearchedTask() },
                 onSortClicked = {},
                 onDeleteAllClicked = {
-                    sharedViewModel.deleteAllTask()
-                    displaySnackBar(
-                        scaffoldState = scaffoldState,
-                        scope = scope,
-                        actionHandler = { sharedViewModel.handleAction(it) },
-                        taskTitle = "",
-                        action = Action.DELETE_ALL
-                    )
+                    if (allTasks is RequestState.Success) {
+                        if ((allTasks as RequestState.Success<List<ToDoTask>>).data.isNotEmpty()) {
+                            isDeleteAllDialogOpen = true
+                        } else {
+                            displayToast(context = context, message = "There is no task.")
+                        }
+                    }
                 }
+
             )
         },
         floatingActionButton = {
@@ -128,7 +154,6 @@ fun displaySnackBar(
         }
     }
 }
-
 
 private fun setMessage(action: Action, taskTitle: String): String {
     return when (action) {
