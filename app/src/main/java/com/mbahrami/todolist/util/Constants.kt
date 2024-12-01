@@ -12,5 +12,8 @@ object Constants {
     const val LIST_SCREEN_ROUTE = "$LIST_SCREEN/{$LIST_SCREEN_ARG_KEY}"
     const val TASK_SCREEN_ROUTE = "$TASK_SCREEN/{$TASK_SCREEN_ARG_KEY}"
 
+    const val PREFERENCE_NAME = "todo_preferences"
+    const val PREFERENCE_KEY = "sort_state"
+
     const val MAX_TITLE_LENGTH = 20
 }

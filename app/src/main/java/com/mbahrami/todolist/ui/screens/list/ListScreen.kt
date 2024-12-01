@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.mbahrami.todolist.R
 import com.mbahrami.todolist.components.DisplayAlertDialog
+import com.mbahrami.todolist.data.models.Priority
 import com.mbahrami.todolist.data.models.ToDoTask
 import com.mbahrami.todolist.ui.screens.task.displayToast
 import com.mbahrami.todolist.ui.theme.fabBackgroundColor
@@ -49,11 +50,15 @@ fun ListScreen(
 
     val allTasks by sharedViewModel.allTasks.collectAsState()
     val searchedTasks by sharedViewModel.searchedTasks.collectAsState()
+    val lowPriorityTasks by sharedViewModel.lowPriorityTasks.collectAsState()
+    val highPriorityTasks by sharedViewModel.highPriorityTasks.collectAsState()
+    val sortState by sharedViewModel.sortState.collectAsState()
     val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
     val searchFieldValue by sharedViewModel.searchQuery
 
     LaunchedEffect(true) {
-        sharedViewModel.getAllTask()
+        sharedViewModel.readSortState()
+        sharedViewModel.loadTasks()
     }
     LaunchedEffect(key1 = action) {
         displaySnackBar(
@@ -91,7 +96,7 @@ fun ListScreen(
                 searchAppBarState = searchAppBarState,
                 onSearchAppBarStateChanged = { sharedViewModel.onSearchAppBarStateChange(newState = it) },
                 onSearchClicked = { sharedViewModel.getSearchedTask() },
-                onSortClicked = {},
+                onSortClicked = { sharedViewModel.persistSortState(priority = it) },
                 onDeleteAllClicked = {
                     if (allTasks is RequestState.Success) {
                         if ((allTasks as RequestState.Success<List<ToDoTask>>).data.isNotEmpty()) {
@@ -108,10 +113,33 @@ fun ListScreen(
             ListFab(onFabClicked = navigateToTaskScreen)
         },
         content = {
-            if (searchAppBarState == SearchAppBarState.TRIGGERED) {
-                ListContent(tasks = searchedTasks, navigateToTaskScreen = navigateToTaskScreen)
-            } else {
-                ListContent(tasks = allTasks, navigateToTaskScreen = navigateToTaskScreen)
+            if (sortState is RequestState.Success) {
+                if (searchAppBarState == SearchAppBarState.TRIGGERED) {
+                    ListContent(tasks = searchedTasks, navigateToTaskScreen = navigateToTaskScreen)
+                } else {
+                    when ((sortState as RequestState.Success<Priority>).data) {
+                        Priority.LOW -> {
+                            ListContent(
+                                tasks = lowPriorityTasks,
+                                navigateToTaskScreen = navigateToTaskScreen
+                            )
+                        }
+
+                        Priority.HIGH -> {
+                            ListContent(
+                                tasks = highPriorityTasks,
+                                navigateToTaskScreen = navigateToTaskScreen
+                            )
+                        }
+
+                        else -> {
+                            ListContent(
+                                tasks = allTasks,
+                                navigateToTaskScreen = navigateToTaskScreen
+                            )
+                        }
+                    }
+                }
             }
         }
     )
