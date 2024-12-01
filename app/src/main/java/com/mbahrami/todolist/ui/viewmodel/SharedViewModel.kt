@@ -182,6 +182,12 @@ class SharedViewModel @Inject constructor(private val repository: ToDoRepository
         onSearchAppBarStateChange(newState = SearchAppBarState.CLOSED)
     }
 
+    fun deleteAllTask() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteAll()
+        }
+    }
+
     private fun undoTask() {
         viewModelScope.launch(Dispatchers.IO) {
             selectedTask.value?.let {

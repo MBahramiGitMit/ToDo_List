@@ -22,6 +22,7 @@ import com.mbahrami.todolist.ui.theme.fabBackgroundColor
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
 import com.mbahrami.todolist.util.SearchAppBarState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -33,6 +34,7 @@ fun ListScreen(
 ) {
 
     val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
 
     val allTasks by sharedViewModel.allTasks.collectAsState()
     val searchedTasks by sharedViewModel.searchedTasks.collectAsState()
@@ -42,13 +44,17 @@ fun ListScreen(
     LaunchedEffect(true) {
         sharedViewModel.getAllTask()
     }
+    LaunchedEffect(key1 = action) {
+        displaySnackBar(
+            scaffoldState = scaffoldState,
+            scope = scope,
+            actionHandler = { sharedViewModel.handleAction(it) },
+            taskTitle = sharedViewModel.title.value,
+            action = action
+        )
+    }
 
-    DisplaySnackBar(
-        scaffoldState = scaffoldState,
-        actionHandler = { sharedViewModel.handleAction(it) },
-        taskTitle = sharedViewModel.title.value,
-        action = action
-    )
+
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -60,7 +66,16 @@ fun ListScreen(
                 onSearchAppBarStateChanged = { sharedViewModel.onSearchAppBarStateChange(newState = it) },
                 onSearchClicked = { sharedViewModel.getSearchedTask() },
                 onSortClicked = {},
-                onDeleteAllClicked = {}
+                onDeleteAllClicked = {
+                    sharedViewModel.deleteAllTask()
+                    displaySnackBar(
+                        scaffoldState = scaffoldState,
+                        scope = scope,
+                        actionHandler = { sharedViewModel.handleAction(it) },
+                        taskTitle = "",
+                        action = Action.DELETE_ALL
+                    )
+                }
             )
         },
         floatingActionButton = {
@@ -91,28 +106,34 @@ fun ListFab(
     }
 }
 
-@Composable
-fun DisplaySnackBar(
+
+fun displaySnackBar(
     scaffoldState: ScaffoldState,
+    scope: CoroutineScope,
     actionHandler: (Action) -> Unit,
     taskTitle: String,
     action: Action
 ) {
-    val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = action) {
-        scope.launch {
-            if (action != Action.NO_ACTION) {
-                val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
-                    message = "${action.name}: $taskTitle",
-                    actionLabel = setActionLabel(action = action)
-                )
-                undoDeletedTask(
-                    action = action,
-                    snackBarResult = snackBarResult,
-                    actionHandler = actionHandler
-                )
-            }
+    scope.launch {
+        if (action != Action.NO_ACTION) {
+            val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = setMessage(action = action, taskTitle = taskTitle),
+                actionLabel = setActionLabel(action = action)
+            )
+            undoDeletedTask(
+                action = action,
+                snackBarResult = snackBarResult,
+                actionHandler = actionHandler
+            )
         }
+    }
+}
+
+
+private fun setMessage(action: Action, taskTitle: String): String {
+    return when (action) {
+        Action.DELETE_ALL -> "All Tasks Removed!"
+        else -> "${action.name}: $taskTitle"
     }
 }
 
