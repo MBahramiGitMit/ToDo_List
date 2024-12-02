@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ToDoList" parent="android:Theme.Material.NoActionBar" >
+    <style name="Theme.ToDoList" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
 
+
+    <style name="Theme.App.ComposeSplash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/animated_dark_logo</item>
+        <item name="windowSplashScreenAnimationDuration">2000</item>
+        <item name="postSplashScreenTheme">@style/Theme.ToDoList</item>
         <item name="android:statusBarColor">@color/black</item>
     </style>
 </resources>
