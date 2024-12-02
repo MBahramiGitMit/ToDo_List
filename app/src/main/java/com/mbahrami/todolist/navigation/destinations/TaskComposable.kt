@@ -1,5 +1,9 @@
 package com.mbahrami.todolist.navigation.destinations
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -20,6 +24,17 @@ fun NavGraphBuilder.taskComposable(
 ) {
     composable(
         route = TASK_SCREEN_ROUTE,
+        enterTransition = {
+            slideIntoContainer(
+                animationSpec = tween(durationMillis = 500, easing = EaseIn),
+                towards = AnimatedContentTransitionScope.SlideDirection.Up
+            )
+        }, exitTransition = {
+            slideOutOfContainer(
+                animationSpec = tween(durationMillis = 500, easing = EaseOut),
+                towards = AnimatedContentTransitionScope.SlideDirection.Down
+            )
+        },
         arguments = listOf(navArgument(name = TASK_SCREEN_ARG_KEY) {
             type = NavType.IntType
         })
