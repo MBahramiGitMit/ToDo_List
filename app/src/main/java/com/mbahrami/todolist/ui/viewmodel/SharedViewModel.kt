@@ -124,7 +124,7 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    fun loadTasks(){
+    fun loadTasks() {
         getAllTask()
         getLowerPriorityTask()
         getHigherPriorityTask()
@@ -142,6 +142,7 @@ class SharedViewModel @Inject constructor(
             _allTasks.value = RequestState.Error(error = e)
         }
     }
+
     private fun getLowerPriorityTask() {
         _lowPriorityTasks.value = RequestState.Loading
         try {
@@ -154,6 +155,7 @@ class SharedViewModel @Inject constructor(
             _lowPriorityTasks.value = RequestState.Error(error = e)
         }
     }
+
     private fun getHigherPriorityTask() {
         _highPriorityTasks.value = RequestState.Loading
         try {
@@ -248,6 +250,12 @@ class SharedViewModel @Inject constructor(
             )
         }
         onSearchAppBarStateChange(newState = SearchAppBarState.CLOSED)
+    }
+
+    fun swipeToDeleteTask(taskId: Int) {
+        getSelectedTask(taskId)
+        handleAction(action = Action.DELETE)
+        loadTasks()
     }
 
     fun deleteAllTask() {

@@ -87,6 +87,64 @@ fun ListScreen(
         onCloseClicked = { isDeleteAllDialogOpen = false }
     )
 
+//    Scaffold(
+//        scaffoldState = scaffoldState,
+//        topBar = {
+//            ListAppBar(
+//                searchFieldValue = searchFieldValue,
+//                onSearchFieldValueChanged = { sharedViewModel.onSearchFieldValueChanged(it) },
+//                searchAppBarState = searchAppBarState,
+//                onSearchAppBarStateChanged = { sharedViewModel.onSearchAppBarStateChange(newState = it) },
+//                onSearchClicked = { sharedViewModel.getSearchedTask() },
+//                onSortClicked = { sharedViewModel.persistSortState(priority = it) },
+//                onDeleteAllClicked = {
+//                    if (allTasks is RequestState.Success) {
+//                        if ((allTasks as RequestState.Success<List<ToDoTask>>).data.isNotEmpty()) {
+//                            isDeleteAllDialogOpen = true
+//                        } else {
+//                            displayToast(context = context, message = "There is no task.")
+//                        }
+//                    }
+//                }
+//
+//            )
+//        },
+//        floatingActionButton = {
+//            ListFab(onFabClicked = navigateToTaskScreen)
+//        },
+//        content = {
+//            if (sortState is RequestState.Success) {
+//                if (searchAppBarState == SearchAppBarState.TRIGGERED) {
+//                    ListContent(tasks = searchedTasks, navigateToTaskScreen = navigateToTaskScreen)
+//                } else {
+//                    when ((sortState as RequestState.Success<Priority>).data) {
+//                        Priority.LOW -> {
+//                            ListContent(
+//                                tasks = lowPriorityTasks,
+//                                navigateToTaskScreen = navigateToTaskScreen
+//                            )
+//                        }
+//
+//                        Priority.HIGH -> {
+//                            ListContent(
+//                                tasks = highPriorityTasks,
+//                                navigateToTaskScreen = navigateToTaskScreen
+//                            )
+//                        }
+//
+//                        else -> {
+//                            ListContent(
+//                                tasks = allTasks,
+//                                navigateToTaskScreen = navigateToTaskScreen
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    )
+
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -115,34 +173,26 @@ fun ListScreen(
         content = {
             if (sortState is RequestState.Success) {
                 if (searchAppBarState == SearchAppBarState.TRIGGERED) {
-                    ListContent(tasks = searchedTasks, navigateToTaskScreen = navigateToTaskScreen)
+                    ListContent(
+                        tasks = searchedTasks,
+                        navigateToTaskScreen = navigateToTaskScreen,
+                        swipeToDelete = { sharedViewModel.swipeToDeleteTask(it) })
                 } else {
-                    when ((sortState as RequestState.Success<Priority>).data) {
-                        Priority.LOW -> {
-                            ListContent(
-                                tasks = lowPriorityTasks,
-                                navigateToTaskScreen = navigateToTaskScreen
-                            )
-                        }
-
-                        Priority.HIGH -> {
-                            ListContent(
-                                tasks = highPriorityTasks,
-                                navigateToTaskScreen = navigateToTaskScreen
-                            )
-                        }
-
-                        else -> {
-                            ListContent(
-                                tasks = allTasks,
-                                navigateToTaskScreen = navigateToTaskScreen
-                            )
-                        }
-                    }
+                    ListContent(
+                        tasks = when ((sortState as RequestState.Success<Priority>).data) {
+                            Priority.LOW -> lowPriorityTasks
+                            Priority.HIGH -> highPriorityTasks
+                            else -> allTasks
+                        },
+                        navigateToTaskScreen = navigateToTaskScreen,
+                        swipeToDelete = { sharedViewModel.swipeToDeleteTask(it) }
+                    )
                 }
             }
         }
     )
+
+
 }
 
 @Composable
