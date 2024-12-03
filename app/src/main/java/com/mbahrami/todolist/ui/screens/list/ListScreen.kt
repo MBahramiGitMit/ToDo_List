@@ -56,10 +56,6 @@ fun ListScreen(
     val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
     val searchFieldValue by sharedViewModel.searchQuery
 
-    LaunchedEffect(true) {
-        sharedViewModel.readSortState()
-        sharedViewModel.loadTasks()
-    }
     LaunchedEffect(key1 = action) {
         displaySnackBar(
             scaffoldState = scaffoldState,
@@ -86,64 +82,6 @@ fun ListScreen(
         },
         onCloseClicked = { isDeleteAllDialogOpen = false }
     )
-
-//    Scaffold(
-//        scaffoldState = scaffoldState,
-//        topBar = {
-//            ListAppBar(
-//                searchFieldValue = searchFieldValue,
-//                onSearchFieldValueChanged = { sharedViewModel.onSearchFieldValueChanged(it) },
-//                searchAppBarState = searchAppBarState,
-//                onSearchAppBarStateChanged = { sharedViewModel.onSearchAppBarStateChange(newState = it) },
-//                onSearchClicked = { sharedViewModel.getSearchedTask() },
-//                onSortClicked = { sharedViewModel.persistSortState(priority = it) },
-//                onDeleteAllClicked = {
-//                    if (allTasks is RequestState.Success) {
-//                        if ((allTasks as RequestState.Success<List<ToDoTask>>).data.isNotEmpty()) {
-//                            isDeleteAllDialogOpen = true
-//                        } else {
-//                            displayToast(context = context, message = "There is no task.")
-//                        }
-//                    }
-//                }
-//
-//            )
-//        },
-//        floatingActionButton = {
-//            ListFab(onFabClicked = navigateToTaskScreen)
-//        },
-//        content = {
-//            if (sortState is RequestState.Success) {
-//                if (searchAppBarState == SearchAppBarState.TRIGGERED) {
-//                    ListContent(tasks = searchedTasks, navigateToTaskScreen = navigateToTaskScreen)
-//                } else {
-//                    when ((sortState as RequestState.Success<Priority>).data) {
-//                        Priority.LOW -> {
-//                            ListContent(
-//                                tasks = lowPriorityTasks,
-//                                navigateToTaskScreen = navigateToTaskScreen
-//                            )
-//                        }
-//
-//                        Priority.HIGH -> {
-//                            ListContent(
-//                                tasks = highPriorityTasks,
-//                                navigateToTaskScreen = navigateToTaskScreen
-//                            )
-//                        }
-//
-//                        else -> {
-//                            ListContent(
-//                                tasks = allTasks,
-//                                navigateToTaskScreen = navigateToTaskScreen
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    )
-
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -191,8 +129,6 @@ fun ListScreen(
             }
         }
     )
-
-
 }
 
 @Composable

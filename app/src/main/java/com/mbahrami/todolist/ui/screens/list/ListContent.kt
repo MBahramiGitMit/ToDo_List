@@ -100,8 +100,15 @@ fun DisplayContent(
             val dismissState = rememberDismissState()
             val dismissDirection = dismissState.dismissDirection
             val isDismissed = dismissState.isDismissed(DismissDirection.EndToStart)
+
+            var itemAppeared by remember { mutableStateOf(false) }
+            LaunchedEffect(true) {
+                itemAppeared = true
+            }
+
             if (isDismissed && dismissDirection == DismissDirection.EndToStart) {
                 rememberCoroutineScope().launch {
+                    itemAppeared = false
                     delay(300)
                     swipeToDelete(task.id)
                 }
@@ -114,10 +121,7 @@ fun DisplayContent(
                     -45f, label = "rotationDegree"
             )
 
-            var itemAppeared by remember { mutableStateOf(false) }
-            LaunchedEffect(true) {
-                itemAppeared = true
-            }
+
             AnimatedVisibility(
                 visible = itemAppeared,
                 enter = expandVertically(animationSpec = tween(durationMillis = 300)),

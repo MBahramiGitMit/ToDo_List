@@ -61,6 +61,11 @@ class SharedViewModel @Inject constructor(
     private val _sortState = MutableStateFlow<RequestState<Priority>>(RequestState.Idle)
     val sortState: StateFlow<RequestState<Priority>> = _sortState
 
+    init {
+        readSortState()
+        loadTasks()
+    }
+
     fun readSortState() {
         _sortState.value = RequestState.Loading
         try {
