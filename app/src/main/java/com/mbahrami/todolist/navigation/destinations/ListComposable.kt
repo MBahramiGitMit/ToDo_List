@@ -1,6 +1,5 @@
 package com.mbahrami.todolist.navigation.destinations
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -26,9 +25,6 @@ fun NavGraphBuilder.listComposable(
     ) { navBackStackEntry ->
         val action: Action =
             navBackStackEntry.arguments!!.getString(LIST_SCREEN_ARG_KEY).toAction()
-        LaunchedEffect(key1 = action) {
-            sharedViewModel.handleAction(action = action)
-        }
         ListScreen(
             action = action,
             sharedViewModel = sharedViewModel,

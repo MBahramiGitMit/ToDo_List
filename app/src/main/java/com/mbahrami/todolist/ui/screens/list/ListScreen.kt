@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -56,14 +57,20 @@ fun ListScreen(
     val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
     val searchFieldValue by sharedViewModel.searchQuery
 
-    LaunchedEffect(key1 = action) {
-        displaySnackBar(
-            scaffoldState = scaffoldState,
-            scope = scope,
-            actionHandler = { sharedViewModel.handleAction(it) },
-            taskTitle = sharedViewModel.title.value,
-            action = action
-        )
+    var saveableAction by rememberSaveable { mutableStateOf(Action.NO_ACTION) }
+
+    LaunchedEffect(key1 = saveableAction) {
+        if (action != saveableAction) {
+            saveableAction = action
+            sharedViewModel.handleAction(action = action)
+            displaySnackBar(
+                scaffoldState = scaffoldState,
+                scope = scope,
+                actionHandler = { sharedViewModel.handleAction(it) },
+                taskTitle = sharedViewModel.title.value,
+                action = action
+            )
+        }
     }
 
     DisplayAlertDialog(
@@ -123,7 +130,16 @@ fun ListScreen(
                             else -> allTasks
                         },
                         navigateToTaskScreen = navigateToTaskScreen,
-                        swipeToDelete = { sharedViewModel.swipeToDeleteTask(it) }
+                        swipeToDelete = { taskId ->
+                            sharedViewModel.swipeToDeleteTask(taskId)
+                            displaySnackBar(
+                                scaffoldState = scaffoldState,
+                                scope = scope,
+                                actionHandler = {action: Action ->  sharedViewModel.handleAction(action) },
+                                taskTitle = sharedViewModel.title.value,
+                                action = Action.DELETE
+                            )
+                        }
                     )
                 }
             }
@@ -156,6 +172,7 @@ fun displaySnackBar(
 ) {
     scope.launch {
         if (action != Action.NO_ACTION) {
+            scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
             val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
                 message = setMessage(action = action, taskTitle = taskTitle),
                 actionLabel = setActionLabel(action = action)

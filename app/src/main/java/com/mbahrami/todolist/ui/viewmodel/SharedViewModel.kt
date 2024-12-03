@@ -66,7 +66,7 @@ class SharedViewModel @Inject constructor(
         loadTasks()
     }
 
-    fun readSortState() {
+    private fun readSortState() {
         _sortState.value = RequestState.Loading
         try {
             viewModelScope.launch(Dispatchers.IO) {
@@ -129,7 +129,7 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    fun loadTasks() {
+    private fun loadTasks() {
         getAllTask()
         getLowerPriorityTask()
         getHigherPriorityTask()
@@ -260,7 +260,6 @@ class SharedViewModel @Inject constructor(
     fun swipeToDeleteTask(taskId: Int) {
         getSelectedTask(taskId)
         handleAction(action = Action.DELETE)
-        loadTasks()
     }
 
     fun deleteAllTask() {
@@ -271,11 +270,15 @@ class SharedViewModel @Inject constructor(
 
     private fun undoTask() {
         viewModelScope.launch(Dispatchers.IO) {
-            selectedTask.value?.let {
-                repository.addTask(
-                    it
+
+            repository.addTask(
+                toDoTask = ToDoTask(
+                    id = id.value,
+                    title = title.value,
+                    description = description.value,
+                    priority = priority.value
                 )
-            }
+            )
         }
     }
 
