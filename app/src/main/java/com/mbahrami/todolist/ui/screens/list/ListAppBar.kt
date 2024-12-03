@@ -146,26 +146,13 @@ fun SortAction(onSortClicked: (Priority) -> Unit) {
             onDismissRequest = {
                 expanded = false
             }) {
-
-            DropdownMenuItem(onClick = {
-                expanded = false
-                onSortClicked(Priority.LOW)
-            }) {
-                PriorityItem(Priority.LOW)
-            }
-
-            DropdownMenuItem(onClick = {
-                expanded = false
-                onSortClicked(Priority.HIGH)
-            }) {
-                PriorityItem(Priority.HIGH)
-            }
-
-            DropdownMenuItem(onClick = {
-                expanded = false
-                onSortClicked(Priority.NONE)
-            }) {
-                PriorityItem(Priority.NONE)
+            Priority.entries.toTypedArray().slice(setOf(0,2,3)).forEach{priority: Priority ->
+                DropdownMenuItem(onClick = {
+                    expanded = false
+                    onSortClicked(priority)
+                }) {
+                    PriorityItem(priority)
+                }
             }
         }
     }

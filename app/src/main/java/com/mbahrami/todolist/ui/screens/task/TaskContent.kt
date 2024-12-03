@@ -47,7 +47,7 @@ fun TaskContent(
 
         Spacer(modifier = Modifier.height(MEDIUM_PADDING))
 
-        PriorityDropDown(priority = priority, onPrioritySelected = onPriorityChange)
+        PriorityDropDown(selectedPriority = priority, onPrioritySelected = onPriorityChange)
 
         OutlinedTextField(
             modifier = Modifier.fillMaxSize(),
