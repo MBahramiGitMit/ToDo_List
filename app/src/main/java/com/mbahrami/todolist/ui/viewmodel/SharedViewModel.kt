@@ -193,7 +193,7 @@ class SharedViewModel @Inject constructor(
             if (allTasks.value is RequestState.Success) {
                 (allTasks.value as RequestState.Success<List<ToDoTask>>).data.find {
                     it.id == taskId
-                }?.copy()
+                }
             } else {
                 null
             }

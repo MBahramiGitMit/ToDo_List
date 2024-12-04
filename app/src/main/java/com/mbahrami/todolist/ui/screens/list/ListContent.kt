@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissState
 import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
@@ -31,9 +31,9 @@ import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.util.fastForEach
 import com.mbahrami.todolist.R
 import com.mbahrami.todolist.data.models.Priority
 import com.mbahrami.todolist.data.models.ToDoTask
@@ -82,6 +83,7 @@ fun ListContent(
     }
 }
 
+
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -91,54 +93,54 @@ fun DisplayContent(
     swipeToDelete: (taskId: Int) -> Unit
 ) {
     LazyColumn {
-        items(
-            items = tasks,
-            key = { task ->
-                task.id
-            }
-        ) { task ->
-            val dismissState = rememberDismissState()
-            val dismissDirection = dismissState.dismissDirection
-            val isDismissed = dismissState.isDismissed(DismissDirection.EndToStart)
+        tasks.fastForEach { task ->
+            item(key = task.id) {
+                val scope = rememberCoroutineScope()
 
-            var itemAppeared by remember { mutableStateOf(false) }
-            LaunchedEffect(true) {
-                itemAppeared = true
-            }
+                val dismissState = remember(task) { DismissState(DismissValue.Default) }
+                val dismissDirection = dismissState.dismissDirection
+                val isDismissed = dismissState.isDismissed(DismissDirection.EndToStart)
 
-            if (isDismissed && dismissDirection == DismissDirection.EndToStart) {
-                rememberCoroutineScope().launch {
-                    itemAppeared = false
-                    delay(300)
-                    swipeToDelete(task.id)
+
+                var itemAppeared by remember { mutableStateOf(false) }
+                LaunchedEffect(true) {
+                    itemAppeared = true
                 }
-            }
 
-            val degree by animateFloatAsState(
-                if (dismissState.targetValue == DismissValue.Default)
-                    0f
-                else
-                    -45f, label = "rotationDegree"
-            )
-
-
-            AnimatedVisibility(
-                visible = itemAppeared,
-                enter = expandVertically(animationSpec = tween(durationMillis = 300)),
-                exit = shrinkVertically(animationSpec = tween(durationMillis = 300))
-            ) {
-                SwipeToDismiss(
-                    state = dismissState,
-                    directions = setOf(DismissDirection.EndToStart),
-                    dismissThresholds = { FractionalThreshold(fraction = 0.25f) },
-                    background = { RedBackground(rotationDegree = degree) },
-                    dismissContent = {
-                        TaskItem(
-                            toDoTask = task,
-                            onItemClicked = navigateToTaskScreen
-                        )
+                if (isDismissed && dismissDirection == DismissDirection.EndToStart) {
+                    SideEffect {
+                        scope.launch {
+                            delay(300)
+                            swipeToDelete(task.id)
+                        }
                     }
+                }
+
+                val degree by animateFloatAsState(
+                    if (dismissState.targetValue == DismissValue.Default)
+                        0f
+                    else
+                        -45f, label = "rotationDegree"
                 )
+
+                AnimatedVisibility(
+                    visible = itemAppeared && !isDismissed,
+                    enter = expandVertically(animationSpec = tween(durationMillis = 300)),
+                    exit = shrinkVertically(animationSpec = tween(durationMillis = 300))
+                ) {
+                    SwipeToDismiss(
+                        state = dismissState,
+                        directions = setOf(DismissDirection.EndToStart),
+                        dismissThresholds = { FractionalThreshold(fraction = 0.25f) },
+                        background = { RedBackground(rotationDegree = degree) },
+                        dismissContent = {
+                            TaskItem(
+                                toDoTask = task,
+                                onItemClicked = navigateToTaskScreen
+                            )
+                        }
+                    )
+                }
             }
         }
     }
