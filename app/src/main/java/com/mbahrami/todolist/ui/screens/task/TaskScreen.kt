@@ -1,16 +1,17 @@
 package com.mbahrami.todolist.ui.screens.task
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.mbahrami.todolist.R
@@ -18,7 +19,7 @@ import com.mbahrami.todolist.components.DisplayAlertDialog
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+
 @Composable
 fun TaskScreen(
     sharedViewModel: SharedViewModel,
@@ -70,8 +71,9 @@ fun TaskScreen(
                 }
             )
         },
-        content = {
+        content = { padding ->
             TaskContent(
+                modifier = Modifier.padding(top = padding.calculateTopPadding()),
                 title = title,
                 onTitleChange = { sharedViewModel.onTitleChanged(newValue = it) },
                 description = description,

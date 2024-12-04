@@ -1,22 +1,22 @@
 package com.mbahrami.todolist.ui.screens.task
 
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.mbahrami.todolist.R
-import com.mbahrami.todolist.ui.theme.topAppBarBackgroundColor
-import com.mbahrami.todolist.ui.theme.topAppBarContentColor
 import com.mbahrami.todolist.util.Action
 
 @Composable
@@ -34,6 +34,7 @@ fun TaskAppBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewTaskAppBar(
     navigateToListScreen: (Action) -> Unit
@@ -45,10 +46,10 @@ fun NewTaskAppBar(
         title = {
             Text(
                 text = stringResource(id = R.string.add_task),
-                color = MaterialTheme.colors.topAppBarContentColor
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
-        backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
         actions = {
             AddAction(onAddClicked = navigateToListScreen)
         }
@@ -61,7 +62,7 @@ fun BackAction(onBackClicked: (Action) -> Unit) {
         Icon(
             imageVector = Icons.Filled.ArrowBackIosNew,
             contentDescription = stringResource(id = R.string.back_arrow),
-            tint = MaterialTheme.colors.topAppBarContentColor
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -72,11 +73,12 @@ fun AddAction(onAddClicked: (Action) -> Unit) {
         Icon(
             imageVector = Icons.Filled.Check,
             contentDescription = stringResource(id = R.string.add_task),
-            tint = MaterialTheme.colors.topAppBarContentColor
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExistingTaskAppBar(
     title: String,
@@ -89,12 +91,12 @@ fun ExistingTaskAppBar(
         title = {
             Text(
                 text = title,
-                color = MaterialTheme.colors.topAppBarContentColor,
+                color = MaterialTheme.colorScheme.onPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         },
-        backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor,
+        colors =TopAppBarDefaults.topAppBarColors(containerColor =MaterialTheme.colorScheme.primary ) ,
         actions = {
             DeleteAction(onDeleteClicked = navigateToListScreen)
             UpdateAction(onUpdateClicked = navigateToListScreen)
@@ -108,7 +110,7 @@ fun CloseAction(onCloseClicked: (Action) -> Unit) {
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = stringResource(id = R.string.close_icon),
-            tint = MaterialTheme.colors.topAppBarContentColor
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -119,7 +121,7 @@ fun DeleteAction(onDeleteClicked: (Action) -> Unit) {
         Icon(
             imageVector = Icons.Filled.DeleteOutline,
             contentDescription = stringResource(id = R.string.delete_icon),
-            tint = MaterialTheme.colors.topAppBarContentColor
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -130,7 +132,7 @@ fun UpdateAction(onUpdateClicked: (Action) -> Unit) {
         Icon(
             imageVector = Icons.Filled.Check,
             contentDescription = stringResource(id = R.string.update_icon),
-            tint = MaterialTheme.colors.topAppBarContentColor
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

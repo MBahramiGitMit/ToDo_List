@@ -1,6 +1,5 @@
 package com.mbahrami.todolist.ui.screens.list
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,21 +18,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissState
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FractionalThreshold
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,14 +54,13 @@ import com.mbahrami.todolist.ui.theme.LARGE_PADDING
 import com.mbahrami.todolist.ui.theme.PRIORITY_INDICATOR_SIZE
 import com.mbahrami.todolist.ui.theme.SMALL_PADDING
 import com.mbahrami.todolist.ui.theme.TASK_ITEM_ELEVATION
-import com.mbahrami.todolist.ui.theme.taskItemBackgroundColor
-import com.mbahrami.todolist.ui.theme.taskItemTextColor
 import com.mbahrami.todolist.util.RequestState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun ListContent(
+    modifier: Modifier,
     tasks: RequestState<List<ToDoTask>>,
     navigateToTaskScreen: (taskId: Int) -> Unit,
     swipeToDelete: (taskId: Int) -> Unit
@@ -73,80 +68,82 @@ fun ListContent(
     if (tasks is RequestState.Success) {
         if (tasks.data.isNotEmpty()) {
             DisplayContent(
+                modifier = modifier,
                 tasks = tasks.data,
                 navigateToTaskScreen = navigateToTaskScreen,
                 swipeToDelete = swipeToDelete
             )
         } else {
-            EmptyContent()
+            EmptyContent(modifier = modifier)
         }
     }
 }
 
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DisplayContent(
+    modifier: Modifier,
     tasks: List<ToDoTask>,
     navigateToTaskScreen: (taskId: Int) -> Unit,
     swipeToDelete: (taskId: Int) -> Unit
 ) {
-    LazyColumn {
+    LazyColumn(modifier = modifier) {
         tasks.fastForEach { task ->
             item(key = task.id) {
                 val scope = rememberCoroutineScope()
-
-                val dismissState = remember(task) { DismissState(DismissValue.Default) }
-                val dismissDirection = dismissState.dismissDirection
-                val isDismissed = dismissState.isDismissed(DismissDirection.EndToStart)
-
+                val density = LocalDensity.current
 
                 var itemAppeared by remember { mutableStateOf(false) }
                 LaunchedEffect(true) {
                     itemAppeared = true
                 }
 
-                if (isDismissed && dismissDirection == DismissDirection.EndToStart) {
-                    SideEffect {
-                        scope.launch {
-                            delay(300)
-                            swipeToDelete(task.id)
-                        }
-                    }
+                val dismissState = remember(task) {
+                    SwipeToDismissBoxState(
+                        initialValue = SwipeToDismissBoxValue.Settled,
+                        density = density,
+                        confirmValueChange = {
+                            if (it == SwipeToDismissBoxValue.EndToStart) {
+                                scope.launch {
+                                    itemAppeared = false
+                                    delay(300)
+                                    swipeToDelete(task.id)
+                                }
+                                true
+                            } else {
+                                false
+                            }
+                        },
+                        positionalThreshold = { totalDistance -> totalDistance / 3 }
+                    )
                 }
 
                 val degree by animateFloatAsState(
-                    if (dismissState.targetValue == DismissValue.Default)
-                        0f
-                    else
-                        -45f, label = "rotationDegree"
+                    if (dismissState.progress in 0f..0.33f) 0f else -45f,
+                    label = "rotationDegree"
                 )
 
                 AnimatedVisibility(
-                    visible = itemAppeared && !isDismissed,
+                    visible = itemAppeared,
                     enter = expandVertically(animationSpec = tween(durationMillis = 300)),
                     exit = shrinkVertically(animationSpec = tween(durationMillis = 300))
                 ) {
-                    SwipeToDismiss(
+                    SwipeToDismissBox(
                         state = dismissState,
-                        directions = setOf(DismissDirection.EndToStart),
-                        dismissThresholds = { FractionalThreshold(fraction = 0.25f) },
-                        background = { RedBackground(rotationDegree = degree) },
-                        dismissContent = {
-                            TaskItem(
-                                toDoTask = task,
-                                onItemClicked = navigateToTaskScreen
-                            )
-                        }
-                    )
+                        backgroundContent = { RedBackground(rotationDegree = degree) },
+                        enableDismissFromStartToEnd = false
+                    ) {
+                        TaskItem(
+                            toDoTask = task,
+                            onItemClicked = navigateToTaskScreen
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TaskItem(
     toDoTask: ToDoTask,
@@ -154,9 +151,8 @@ fun TaskItem(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colors.taskItemBackgroundColor,
         shape = RectangleShape,
-        elevation = TASK_ITEM_ELEVATION,
+        shadowElevation = TASK_ITEM_ELEVATION,
         onClick = { onItemClicked(toDoTask.id) }
     ) {
 
@@ -171,9 +167,9 @@ fun TaskItem(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = toDoTask.title,
-                    color = MaterialTheme.colors.taskItemTextColor,
-                    style = MaterialTheme.typography.h5,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
 
                 Canvas(modifier = Modifier.size(PRIORITY_INDICATOR_SIZE)) {
@@ -184,8 +180,7 @@ fun TaskItem(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = toDoTask.description,
-                color = MaterialTheme.colors.taskItemTextColor,
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )

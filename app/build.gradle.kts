@@ -61,7 +61,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material)
+    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -86,10 +86,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     //Material Icons
-    implementation ("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation (libs.androidx.material.icons.extended)
 
     //SplashScreen
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
 
 
 }
