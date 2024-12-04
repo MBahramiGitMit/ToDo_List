@@ -11,14 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,11 +57,11 @@ fun PriorityDropDown(
             parentSize = it.size
         }
         .height(PRIORITY_DROP_DOWN_HEIGHT)
-        .background(MaterialTheme.colors.background)
+        .background(MaterialTheme.colorScheme.background)
         .clickable { expanded = true }
         .border(
             width = 1.dp,
-            color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
             shape = MaterialTheme.shapes.small
         ),
         verticalAlignment = Alignment.CenterVertically
@@ -77,11 +76,11 @@ fun PriorityDropDown(
         Text(
             modifier = Modifier.weight(8f),
             text = selectedPriority.name,
-            style = MaterialTheme.typography.subtitle1
+            style = MaterialTheme.typography.bodyMedium
         )
         Icon(
             modifier = Modifier
-                .alpha(ContentAlpha.medium)
+                .alpha(0.38f)
                 .rotate(angle)
                 .weight(1.5f),
             imageVector = Icons.Filled.ArrowDropDown,
@@ -95,17 +94,16 @@ fun PriorityDropDown(
             onDismissRequest = { expanded = false }
         ) {
             Priority.entries.toTypedArray().slice(0..2).forEach { prior ->
-                DropdownMenuItem(onClick = {
-                    expanded = false
-                    onPrioritySelected(prior)
-                }) {
-                    PriorityItem(prior)
-                }
+                DropdownMenuItem(
+                    text = { PriorityItem(prior) },
+                    onClick = {
+                        expanded = false
+                        onPrioritySelected(prior)
+                    })
             }
         }
     }
 }
-
 
 @Composable
 @Preview

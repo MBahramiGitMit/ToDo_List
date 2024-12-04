@@ -5,27 +5,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SentimentVeryDissatisfied
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mbahrami.todolist.R
-import com.mbahrami.todolist.ui.theme.MediumGray
 
 @Composable
-fun EmptyContent() {
+fun EmptyContent(modifier: Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background),
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -33,20 +31,14 @@ fun EmptyContent() {
             modifier = Modifier.size(150.dp),
             imageVector = Icons.Filled.SentimentVeryDissatisfied,
             contentDescription = stringResource(id = R.string.sad_face_icon),
-            tint = MediumGray
+            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
         )
 
         Text(
             text = stringResource(id = R.string.empty_content),
-            color = MediumGray,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
             fontWeight = FontWeight.W900,
-            fontSize = MaterialTheme.typography.h6.fontSize
+            fontSize = MaterialTheme.typography.titleSmall.fontSize
         )
     }
-}
-
-@Composable
-@Preview
-fun PreviewEmptyContent() {
-    EmptyContent()
 }

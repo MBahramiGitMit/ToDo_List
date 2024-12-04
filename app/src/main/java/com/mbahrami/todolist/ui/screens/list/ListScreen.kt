@@ -1,15 +1,15 @@
 package com.mbahrami.todolist.ui.screens.list
 
-import android.annotation.SuppressLint
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarResult
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,7 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.mbahrami.todolist.R
@@ -27,7 +27,6 @@ import com.mbahrami.todolist.components.DisplayAlertDialog
 import com.mbahrami.todolist.data.models.Priority
 import com.mbahrami.todolist.data.models.ToDoTask
 import com.mbahrami.todolist.ui.screens.task.displayToast
-import com.mbahrami.todolist.ui.theme.fabBackgroundColor
 import com.mbahrami.todolist.ui.viewmodel.SharedViewModel
 import com.mbahrami.todolist.util.Action
 import com.mbahrami.todolist.util.RequestState
@@ -35,7 +34,6 @@ import com.mbahrami.todolist.util.SearchAppBarState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ListScreen(
     action: Action,
@@ -43,9 +41,10 @@ fun ListScreen(
     navigateToTaskScreen: (taskId: Int) -> Unit
 ) {
 
-    val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     var isDeleteAllDialogOpen: Boolean by remember { mutableStateOf(false) }
 
@@ -64,7 +63,7 @@ fun ListScreen(
             saveableAction = action
             sharedViewModel.handleAction(action = action)
             displaySnackBar(
-                scaffoldState = scaffoldState,
+                snackBarHostState = snackBarHostState,
                 scope = scope,
                 actionHandler = { sharedViewModel.handleAction(it) },
                 taskTitle = sharedViewModel.title.value,
@@ -80,7 +79,7 @@ fun ListScreen(
         onConfirmClicked = {
             sharedViewModel.deleteAllTask()
             displaySnackBar(
-                scaffoldState = scaffoldState,
+                snackBarHostState = snackBarHostState,
                 scope = scope,
                 actionHandler = { sharedViewModel.handleAction(it) },
                 taskTitle = "",
@@ -91,7 +90,7 @@ fun ListScreen(
     )
 
     Scaffold(
-        scaffoldState = scaffoldState,
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
             ListAppBar(
                 searchFieldValue = searchFieldValue,
@@ -115,33 +114,30 @@ fun ListScreen(
         floatingActionButton = {
             ListFab(onFabClicked = navigateToTaskScreen)
         },
-        content = {
+        content = { padding ->
             if (sortState is RequestState.Success) {
-                if (searchAppBarState == SearchAppBarState.TRIGGERED) {
-                    ListContent(
-                        tasks = searchedTasks,
-                        navigateToTaskScreen = navigateToTaskScreen,
-                        swipeToDelete = { sharedViewModel.swipeToDeleteTask(it) })
-                } else {
-                    ListContent(
-                        tasks = when ((sortState as RequestState.Success<Priority>).data) {
-                            Priority.LOW -> lowPriorityTasks
-                            Priority.HIGH -> highPriorityTasks
-                            else -> allTasks
-                        },
-                        navigateToTaskScreen = navigateToTaskScreen,
-                        swipeToDelete = { taskId ->
-                            sharedViewModel.swipeToDeleteTask(taskId)
-                            displaySnackBar(
-                                scaffoldState = scaffoldState,
-                                scope = scope,
-                                actionHandler = {action: Action ->  sharedViewModel.handleAction(action) },
-                                taskTitle = sharedViewModel.title.value,
-                                action = Action.DELETE
-                            )
-                        }
-                    )
-                }
+                ListContent(
+                    modifier = Modifier.padding(top = padding.calculateTopPadding()),
+                    tasks = when {
+                        searchAppBarState == SearchAppBarState.TRIGGERED -> searchedTasks
+                        (sortState as RequestState.Success<Priority>).data == Priority.LOW -> lowPriorityTasks
+                        (sortState as RequestState.Success<Priority>).data == Priority.HIGH -> highPriorityTasks
+                        else -> allTasks
+                    },
+                    navigateToTaskScreen = navigateToTaskScreen,
+                    swipeToDelete = { taskId ->
+                        sharedViewModel.swipeToDeleteTask(taskId)
+                        displaySnackBar(
+                            snackBarHostState = snackBarHostState,
+                            scope = scope,
+                            actionHandler = { action: Action ->
+                                sharedViewModel.handleAction(action)
+                            },
+                            taskTitle = sharedViewModel.title.value,
+                            action = Action.DELETE
+                        )
+                    }
+                )
             }
         }
     )
@@ -152,19 +148,17 @@ fun ListFab(
     onFabClicked: (taskId: Int) -> Unit
 ) {
     FloatingActionButton(
-        backgroundColor = MaterialTheme.colors.fabBackgroundColor,
         onClick = { onFabClicked(-1) }) {
         Icon(
             imageVector = Icons.Filled.Add,
             contentDescription = stringResource(R.string.add_button),
-            tint = Color.White
         )
     }
 }
 
 
 fun displaySnackBar(
-    scaffoldState: ScaffoldState,
+    snackBarHostState: SnackbarHostState,
     scope: CoroutineScope,
     actionHandler: (Action) -> Unit,
     taskTitle: String,
@@ -172,10 +166,11 @@ fun displaySnackBar(
 ) {
     scope.launch {
         if (action != Action.NO_ACTION) {
-            scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
-            val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
+            snackBarHostState.currentSnackbarData?.dismiss()
+            val snackBarResult = snackBarHostState.showSnackbar(
                 message = setMessage(action = action, taskTitle = taskTitle),
-                actionLabel = setActionLabel(action = action)
+                actionLabel = setActionLabel(action = action),
+                duration = SnackbarDuration.Short
             )
             undoDeletedTask(
                 action = action,
@@ -207,5 +202,6 @@ private fun undoDeletedTask(
 ) {
     if (snackBarResult == SnackbarResult.ActionPerformed && action == Action.DELETE) {
         actionHandler(Action.UNDO)
+
     }
 }
