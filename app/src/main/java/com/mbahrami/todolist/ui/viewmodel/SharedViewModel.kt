@@ -254,7 +254,7 @@ class SharedViewModel @Inject constructor(
                 )
             )
         }
-        onSearchAppBarStateChange(newState = SearchAppBarState.CLOSED)
+//        onSearchAppBarStateChange(newState = SearchAppBarState.CLOSED)
     }
 
     fun swipeToDeleteTask(taskId: Int) {
